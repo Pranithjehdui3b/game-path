@@ -1,0 +1,176 @@
+$ (document).ready(function() {
+var sound = new Soundmanager();//**
+var level = new Level('world');//world is the id of the corresponding DOM container
+    level.setSounds(sounds);//*
+    level.load(definedLevels[0]);
+    level.start();
+    keys.bind();
+    
+    <!doctype html>
+<html>
+<head>
+<meta charset=utf-8 />
+<title>Super Mario HTML5</title>
+<link href="Content/style.css" rel="stylesheet" />
+</head>
+<body>
+<div id="game">
+<div id="world">
+</div>
+<div id="coinNumber" class="gauge">0</div>
+<div id="coin" class="gaugeSprite"></div>
+<div id="liveNumber" class="gauge">0</div>
+<div id="live" class="gaugeSprite"></div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<script src="Scripts/testlevels.js"></script>
+<script src="Scripts/oop.js"></script>
+<script src="Scripts/keys.js"></script>
+<script src="Scripts/sounds.js"></script>
+<script src="Scripts/constants.js"></script>
+<script src="Scripts/main.js"></script>
+</body>
+  </html>
+  
+  @font-face {
+   font-family: 'SMB';
+   src: local('Super Mario Bros.'),
+        url('fonts/Super Mario Bros.ttf') format('truetype');
+   font-style: normal;
+}
+
+#game {
+	height: 480px; width: 640px; position: absolute; left: 50%; top: 50%;
+	margin-left: -321px; margin-top: -241px; border: 1px solid #ccc; overflow: hidden;
+}
+#world { 
+	margin: 0; padding: 0; height: 100%; width: 100%; position: absolute;
+	bottom: 0; left: 0; z-index: 0;
+}
+.gauge {
+	margin: 0; padding: 0; height: 50px; width: 70px; text-align: right; font-size: 2em;
+	font-weight: bold; position: absolute; top: 17px; right: 52px; z-index: 1000;
+	position: absolute; font-family: 'SMB';
+}
+.gaugeSprite {
+	margin: 0; padding: 0; z-index: 1000; position: absolute;
+}
+#coinNumber {
+	left: 0;
+}
+#liveNumber {
+	right: 52px;
+}
+#coin {
+	height: 32px; width: 32px; background-image : url(mario-objects.png);
+	background-position: 0 0; top: 15px; left: 70px;
+}
+#live {
+	height: 40px; width: 40px; background-image : url(mario-sprites.png);
+	background-position : 0 -430px; top: 12px; right: 8px;
+}
+.figure {
+	margin: 0; padding: 0; z-index: 99; position: absolute;
+}
+.matter {
+	margin: 0; padding: 0; z-index: 95; position: absolute; width: 32px; height: 32px;
+}
+
+(function(){
+    var initializing = false, fnTest = /xyz/.test(function(){xyz;}) ? /\b_super\b/ : /.*/;
+
+    // The base Class implementation (does nothing)
+    this.Class = function(){ };
+   
+    // Create a new Class that inherits from this class
+    Class.extend = function(prop, ref_name) {
+        if(ref_name)
+            reflection[ref_name] = Class;
+            
+        var _super = this.prototype;
+
+        // Instantiate a base class (but only create the instance,
+        // don't run the init constructor)
+        initializing = true;
+        var prototype = new this();
+        initializing = false;
+         
+        // Copy the properties over onto the new prototype
+        for (var name in prop) {
+        // Check if we're overwriting an existing function
+        prototype[name] = typeof prop[name] == "function" && 
+            typeof _super[name] == "function" && fnTest.test(prop[name]) ?
+            (function(name, fn) {
+                return function() {
+                    var tmp = this._super;
+
+                    // Add a new ._super() method that is the same method
+                    // but on the super-class
+                    this._super = _super[name];
+
+                    // The method only need to be bound temporarily, so we
+                    // remove it when we're done executing
+                    var ret = fn.apply(this, arguments);        
+                    this._super = tmp;
+
+                    return ret;
+                };
+            })(name, prop[name]) :
+            prop[name];
+        }
+         
+        // The dummy class constructor
+        function Class() {
+            // All construction is actually done in the init method
+            if ( !initializing && this.init )
+                this.init.apply(this, arguments);
+        }
+         
+        // Populate our constructed prototype object
+        Class.prototype = prototype;
+         
+        // Enforce the constructor to be what we expect
+        Class.prototype.constructor = Class;
+
+        // And make this class extendable
+        Class.extend = arguments.callee;
+         
+        return Class;
+    };
+})();
+
+var TopGrass = Ground.extend({
+    init: function(x, y, level) {
+        var blocking = ground_blocking.top;
+        this._super(x, y, blocking, level);
+        this.setImage(images.objects, 888, 404);
+    },
+}, 'grass_top');
+
+var Matter = Base.extend({
+    init: function(x, y, blocking, level) {
+        this.blocking = blocking;
+        this.view = $(DIV).addClass(CLS_MATTER).appendTo(level.world);
+        this.level = level;
+        this._super(x, y);
+        this.setSize(32, 32);
+        this.addToGrid(level);
+    },
+    addToGrid: function(level) {
+        level.obstacles[this.x / 32][this.level.getGridHeight() - 1 - this.y / 32] = this;
+    },
+    setImage: function(img, x, y) {
+        this.view.css({
+            backgroundImage : img ? c2u(img) : 'none',
+            backgroundPosition : '-' + (x || 0) + 'px -' + (y || 0) + 'px',
+        });
+        this._super(img, x, y);
+    },
+    setPosition: function(x, y) {
+        this.view.css({
+            left: x,
+            bottom: y
+        });
+        this._super(x, y);
+    },
+});
